@@ -4,7 +4,7 @@ from importlib.resources import files
 
 
 def _data_path(filename):
-    return str(files("pfas_birthweight.data_files").joinpath(filename))
+    return str(files("pfas_birthweight.data").joinpath(filename))
 
 
 def load_pfas():

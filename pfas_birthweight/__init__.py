@@ -22,7 +22,7 @@ Basic usage::
     )
 """
 
-from pfas_birthweight.data import (
+from pfas_birthweight.pipeline import (
     load_pfas,
     collapse_pfas_to_pws,
     load_geo,

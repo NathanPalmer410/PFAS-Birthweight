@@ -1,14 +1,26 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
-name = "386proj"
-version = "0.1.0"
-description = "Add your description here"
+name = "pfas-birthweight"
+version = "0.1.2"
+description = "Build a county-year panel dataset linking PFAS drinking water contamination to birth weight outcomes."
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+
 dependencies = [
-    "ipykernel>=7.2.0",
-    "openpyxl>=3.1.5",
-    "pandas>=3.0.1",
-    "requests>=2.33.0",
-    "scikit-learn>=1.8.0",
-    "streamlit>=1.56.0",
+    "pandas",
+    "numpy",
+    "openpyxl",
+    "geopandas>=1.0.1",
+    "matplotlib>=3.9.4",
 ]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["pfas_birthweight*"]
+
+[tool.setuptools.package-data]
+"pfas_birthweight.data" = ["*.xlsx", "*.csv", "*.txt"]
