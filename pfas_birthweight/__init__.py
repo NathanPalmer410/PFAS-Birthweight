@@ -34,6 +34,11 @@ from pfas_birthweight.pipeline import (
     build_pfas_birthweight_panel,
 )
 
+from pfas_birthweight.analysis import (
+    plot_eda,
+    run_regression,
+)
+
 __all__ = [
     "load_pfas",
     "collapse_pfas_to_pws",
@@ -44,5 +49,7 @@ __all__ = [
     "load_birth_weights",
     "build_panel",
     "build_pfas_birthweight_panel",
+    "plot_eda",
+    "run_regression",
 ]
 
