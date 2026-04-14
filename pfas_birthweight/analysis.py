@@ -64,6 +64,3 @@ def run_regression(panel):
         print(f"{var:<20} {coef:>8.3f} {se:>10.3f} {pval:>10.3f}")
 
     return model
-
-panel = build_pfas_birthweight_panel()
-plot_eda(panel)
