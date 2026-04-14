@@ -4,139 +4,102 @@ title: "Getting Started"
 
 ## Installation
 
-First, ensure you have the required dependencies installed. The package requires:
-- `requests` - for web scraping
-- `beautifulsoup4` - for HTML parsing
-- `pandas` - for data manipulation
-- `ollama` - for generating embeddings
-- `numpy` - for numerical operations
+Install the package directly from PyPI:
 
-Install them with:
 ```bash
-pip install requests beautifulsoup4 pandas ollama numpy
+pip install pfas-birthweight
 ```
+
+The package requires Python 3.9+ and will automatically install the following dependencies:
+
+- `pandas` - data manipulation
+- `numpy` - numerical operations
+- `openpyxl` - Excel file reading
+- `statsmodels` - regression analysis
+- `matplotlib` - plotting
 
 ## Quick Start
 
-### 1. Basic Data Collection
+### 1. Build the Panel
 
-The simplest way to get started is to use the `data_pipeline()` function to collect talks from recent General Conferences:
+All data is bundled with the package. Simply run:
 
 ```python
-from gc_analysis.data import data_pipeline
+from pfas_birthweight import build_pfas_birthweight_panel
 
-# Collect talks from April and October 2025
-df = data_pipeline(years=[2025], months=["04", "10"])
-
-# View the first few talks
-print(df.head())
+panel = build_pfas_birthweight_panel()
+print(panel.head())
 ```
 
 This will:
-1. Scrape all talks from the specified conferences
-2. Extract speaker information and talk content
-3. Clean and standardize the data
-4. Generate embeddings for each talk
-5. Save everything to `data/gc_talks.csv`
 
-### 2. Access Your Data
+1. Load and clean raw PFAS sample data, replacing non-detects with MRL/2
+2. Collapse measurements to the public water system level
+3. Merge with EPA geographic areas to map systems to counties
+4. Aggregate to population-weighted county-level PFAS estimates
+5. Attach 5-digit FIPS codes using the Census crosswalk
+6. Merge with CDC WONDER birth weight data by FIPS and year
 
-After running the pipeline, you can work with the collected data:
-
-```python
-from gc_analysis.data import load_embeddings_from_csv
-
-# Load the saved data with embeddings
-df = load_embeddings_from_csv("data/gc_talks.csv")
-
-# Explore the data
-print(f"Total talks: {len(df)}")
-print(f"Unique speakers: {df['author'].nunique()}")
-print(f"Speakers by role:\n{df['role'].value_counts()}")
-```
-
-### 3. Analyze the Data
-
-Now you can perform various analyses on the collected talks:
+### 2. Explore the Data
 
 ```python
-# Find talks by a specific speaker
-speaker_talks = df[df['author'] == 'Nelson Russell M.']
-print(f"Talks by Nelson Russell M.: {len(speaker_talks)}")
+# Check coverage
+print(f"Counties: {panel['FIPS'].nunique()}")
+print(f"States:   {panel['STATE'].unique()}")
+print(f"Years:    {sorted(panel['year'].unique())}")
 
-# Find talks by a specific role
-apostle_talks = df[df['role'] == 'A']
-print(f"Total talks by Apostles: {len(apostle_talks)}")
-
-# View talk information
-for idx, row in df.head(3).iterrows():
-    print(f"\nTitle: {row['title']}")
-    print(f"Speaker: {row['author']} ({row['role']})")
-    print(f"Summary: {row['kicker']}")
+# View a specific state
+print(panel[panel['STATE'] == 'OH'].head())
 ```
 
-### 4. Collect Multiple Years
+The resulting panel has the following columns:
 
-You can easily expand your dataset to include multiple years:
+| Column | Description |
+|---|---|
+| `FIPS` | 5-digit county FIPS code |
+| `STATE` | 2-letter state abbreviation |
+| `COUNTY_SERVED` | County name |
+| `year` | Year (2016–2024) |
+| `births` | Number of births |
+| `avg_birth_weight` | Average birth weight (grams) |
+| `PFAS_county` | Population-weighted mean PFAS (ng/L) |
+
+### 3. Plot the Data
 
 ```python
-# Collect talks from April and October of 2024 and 2025
-df = data_pipeline(years=[2024, 2025], months=["04", "10"], save_csv=True)
+from pfas_birthweight import plot_eda
 
-# This will take longer due to increased number of talks
+plot_eda(panel)
 ```
 
-## Common Patterns
+This produces two side-by-side plots:
 
-### Silencing Progress Output
+- A scatter plot of PFAS concentration vs average birth weight with a trend line
+- Average birth weight over time (2016–2024) by state
 
-If you want to run the pipeline without verbose output:
+### 4. Run the Regression
 
 ```python
-df = data_pipeline(verbose=False)
+from pfas_birthweight import run_regression
+
+model = run_regression(panel)
 ```
 
-### Collecting Without Saving CSV
+Runs an OLS regression of average birth weight on PFAS concentration with year fixed effects and standard errors clustered by county:
 
-If you only want the data in memory:
+$$\text{BirthWeight}_{ct} = \beta \cdot \text{PFAS}_{c} + \gamma_t + \varepsilon_{ct}$$
+
+## Saving the Panel
+
+If you plan to run analysis scripts repeatedly, save the panel to CSV to avoid rebuilding the pipeline each time:
 
 ```python
-df = data_pipeline(save_csv=False)
-# Data is not saved to CSV, only returned
+panel.to_csv("panel.csv", index=False)
 ```
 
-### Combining Multiple Collections
-
-You can run the pipeline multiple times and combine results:
+Then load it directly in subsequent scripts:
 
 ```python
 import pandas as pd
-
-# First collection
-df1 = data_pipeline(years=[2024], months=["04"], verbose=False)
-
-# Second collection
-df2 = data_pipeline(years=[2024], months=["10"], verbose=False)
-
-# Combine them
-df_combined = pd.concat([df1, df2], ignore_index=True)
-print(f"Total talks collected: {len(df_combined)}")
+panel = pd.read_csv("panel.csv", dtype={"FIPS": str})
 ```
-
-## Next Steps
-
-- Check out the [Documentation](api.qmd) for detailed function documentation
-- Explore the data interactively in a Jupyter notebook
-- Use embeddings for similarity analysis and clustering
-- Build visualizations of speaker frequency, role distributions, and more
-
-## Troubleshooting
-
-**Issue:** "ollama" module not found
-- **Solution:** Make sure Ollama is installed and running. Install with `pip install ollama` and run the Ollama service.
-
-**Issue:** Web scraping is very slow or times out
-- **Solution:** This is normal for collecting many talks. The script includes progress bars using `tqdm` to track progress. Large collections may take 10-30 minutes.
-
-**Issue:** Embeddings are not being generated
-- **Solution:** Ensure Ollama is running and the `embeddinggemma` model is available. You may need to pull the model with `ollama pull embeddinggemma`.

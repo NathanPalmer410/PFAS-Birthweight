@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.33">
+<meta name="generator" content="quarto-1.8.26">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Documentation - PFAS and Birth Weights Analysis</title>
+<title>Documentation – General Conference Analysis</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -50,6 +50,8 @@ pre.numberSource code > span > a:first-child::before
     padding: 0 4px; width: 4em;
   }
 pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
@@ -65,14 +67,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="quarto:offset" content="./">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea385d0e468b0dd5ea5bf0780b1290d9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-597958c53c93a607afca12fd375c57ed.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-dfb324f25d9b1687192fa8be62ac8f9c.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-7f2553f82da0a27203d2dd69918cfc55.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -101,8 +104,36 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
-<link rel="stylesheet" href="styles.css">
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
 </head>
 
 <body class="nav-fixed quarto-light">
@@ -155,14 +186,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
   <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
-  <li><a href="#main-functions" id="toc-main-functions" class="nav-link" data-scroll-target="#main-functions">Main Functions</a>
+  <li><a href="#pipeline-functions" id="toc-pipeline-functions" class="nav-link" data-scroll-target="#pipeline-functions">Pipeline Functions</a>
   <ul class="collapse">
-  <li><a href="#data_pipeline" id="toc-data_pipeline" class="nav-link" data-scroll-target="#data_pipeline"><code>data_pipeline()</code></a></li>
-  <li><a href="#grab_gc_talk" id="toc-grab_gc_talk" class="nav-link" data-scroll-target="#grab_gc_talk"><code>grab_gc_talk()</code></a></li>
-  <li><a href="#extract_data" id="toc-extract_data" class="nav-link" data-scroll-target="#extract_data"><code>extract_data()</code></a></li>
-  <li><a href="#clean_data" id="toc-clean_data" class="nav-link" data-scroll-target="#clean_data"><code>clean_data()</code></a></li>
-  <li><a href="#generate_embeddings" id="toc-generate_embeddings" class="nav-link" data-scroll-target="#generate_embeddings"><code>generate_embeddings()</code></a></li>
-  <li><a href="#load_embeddings_from_csv" id="toc-load_embeddings_from_csv" class="nav-link" data-scroll-target="#load_embeddings_from_csv"><code>load_embeddings_from_csv()</code></a></li>
+  <li><a href="#build_pfas_birthweight_panel" id="toc-build_pfas_birthweight_panel" class="nav-link" data-scroll-target="#build_pfas_birthweight_panel"><code>build_pfas_birthweight_panel()</code></a></li>
+  <li><a href="#load_pfas" id="toc-load_pfas" class="nav-link" data-scroll-target="#load_pfas"><code>load_pfas()</code></a></li>
+  <li><a href="#collapse_pfas_to_pws" id="toc-collapse_pfas_to_pws" class="nav-link" data-scroll-target="#collapse_pfas_to_pws"><code>collapse_pfas_to_pws()</code></a></li>
+  <li><a href="#load_geo" id="toc-load_geo" class="nav-link" data-scroll-target="#load_geo"><code>load_geo()</code></a></li>
+  <li><a href="#build_county_pfas" id="toc-build_county_pfas" class="nav-link" data-scroll-target="#build_county_pfas"><code>build_county_pfas()</code></a></li>
+  <li><a href="#load_crosswalk" id="toc-load_crosswalk" class="nav-link" data-scroll-target="#load_crosswalk"><code>load_crosswalk()</code></a></li>
+  <li><a href="#attach_fips_to_pfas" id="toc-attach_fips_to_pfas" class="nav-link" data-scroll-target="#attach_fips_to_pfas"><code>attach_fips_to_pfas()</code></a></li>
+  <li><a href="#load_birth_weights" id="toc-load_birth_weights" class="nav-link" data-scroll-target="#load_birth_weights"><code>load_birth_weights()</code></a></li>
+  <li><a href="#build_panel" id="toc-build_panel" class="nav-link" data-scroll-target="#build_panel"><code>build_panel()</code></a></li>
+  </ul></li>
+  <li><a href="#analysis-functions" id="toc-analysis-functions" class="nav-link" data-scroll-target="#analysis-functions">Analysis Functions</a>
+  <ul class="collapse">
+  <li><a href="#plot_eda" id="toc-plot_eda" class="nav-link" data-scroll-target="#plot_eda"><code>plot_eda()</code></a></li>
+  <li><a href="#run_regression" id="toc-run_regression" class="nav-link" data-scroll-target="#run_regression"><code>run_regression()</code></a></li>
   </ul></li>
   </ul>
 </nav>
@@ -191,207 +230,217 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="overview" class="level2">
 <h2 class="anchored" data-anchor-id="overview">Overview</h2>
-<p>The <code>gc_analysis</code> package provides a suite of functions for scraping, processing, and analyzing General Conference talks. This page documents the main functions available in the package.</p>
-</section>
-<section id="main-functions" class="level2">
-<h2 class="anchored" data-anchor-id="main-functions">Main Functions</h2>
-<section id="data_pipeline" class="level3">
-<h3 class="anchored" data-anchor-id="data_pipeline"><code>data_pipeline()</code></h3>
-<p>The primary function for orchestrating the entire data collection and processing workflow.</p>
-<p><strong>Signature:</strong></p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>data_pipeline(years<span class="op">=</span>[<span class="dv">2025</span>], months<span class="op">=</span>[<span class="st">"04"</span>, <span class="st">"10"</span>], save_csv<span class="op">=</span><span class="va">True</span>, verbose<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>years</code> (list, default: <code>[2025]</code>): List of conference years to collect (e.g., <code>[2024, 2025]</code>)</li>
-<li><code>months</code> (list, default: <code>["04", "10"]</code>): List of conference months as strings (e.g., <code>["04", "10"]</code> for April and October)</li>
-<li><code>save_csv</code> (bool, default: <code>True</code>): Whether to save the processed data to <code>data/gc_talks.csv</code></li>
-<li><code>verbose</code> (bool, default: <code>True</code>): Whether to print progress messages during execution</li>
-</ul>
-<p><strong>Returns:</strong></p>
-<ul>
-<li><code>pd.DataFrame</code>: A pandas DataFrame containing the collected and processed talks with the following columns:
-<ul>
-<li><code>title</code>: Talk title</li>
-<li><code>author</code>: Speaker name</li>
-<li><code>role</code>: Speaker’s position/responsibility (cleaned)</li>
-<li><code>kicker</code>: Summary/description of the talk</li>
-<li><code>text</code>: Full talk text</li>
-<li><code>year</code>: Conference year</li>
-<li><code>month</code>: Conference month</li>
-<li><code>embedding</code>: Vector embedding of the talk text (as a JSON string in CSV)</li>
-</ul></li>
-</ul>
-<p><strong>Example:</strong></p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> gc_analysis.data <span class="im">import</span> data_pipeline</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Collect talks from April and October 2025</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> data_pipeline(years<span class="op">=</span>[<span class="dv">2025</span>], months<span class="op">=</span>[<span class="st">"04"</span>, <span class="st">"10"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The <code>pfas_birthweight</code> package provides a suite of functions for loading, cleaning, merging, and analyzing PFAS drinking water contamination data alongside CDC birth weight outcomes. This page documents all available functions.</p>
 <hr>
 </section>
-<section id="grab_gc_talk" class="level3">
-<h3 class="anchored" data-anchor-id="grab_gc_talk"><code>grab_gc_talk()</code></h3>
-<p>Scrapes talks from the Church website for a specified year and month.</p>
+<section id="pipeline-functions" class="level2">
+<h2 class="anchored" data-anchor-id="pipeline-functions">Pipeline Functions</h2>
+<section id="build_pfas_birthweight_panel" class="level3">
+<h3 class="anchored" data-anchor-id="build_pfas_birthweight_panel"><code>build_pfas_birthweight_panel()</code></h3>
+<p>The primary function that runs the entire pipeline end-to-end and returns a county-year panel ready for analysis.</p>
 <p><strong>Signature:</strong></p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>grab_gc_talk(data_dict, year, month)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>data_dict</code> (dict): Dictionary to accumulate talk data with keys: <code>title</code>, <code>author</code>, <code>role</code>, <code>kicker</code>, <code>text</code>, <code>year</code>, <code>month</code></li>
-<li><code>year</code> (int): Conference year (e.g., <code>2025</code>)</li>
-<li><code>month</code> (str): Conference month as a string (e.g., <code>"04"</code> for April)</li>
-</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>build_pfas_birthweight_panel()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>Returns:</strong></p>
 <ul>
-<li><code>dict</code>: Updated <code>data_dict</code> with new talks appended</li>
+<li><code>pd.DataFrame</code>: A panel DataFrame with the following columns:</li>
 </ul>
-<p><strong>Note:</strong> This function is typically called by <code>data_pipeline()</code> and rarely needs to be called directly.</p>
-<hr>
-</section>
-<section id="extract_data" class="level3">
-<h3 class="anchored" data-anchor-id="extract_data"><code>extract_data()</code></h3>
-<p>Helper function to extract text content from HTML elements using BeautifulSoup.</p>
-<p><strong>Signature:</strong></p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>extract_data(soup, tag, class_name)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>soup</code> (BeautifulSoup): Parsed HTML document</li>
-<li><code>tag</code> (str): HTML tag name (e.g., <code>'h1'</code>, <code>'p'</code>, <code>'div'</code>)</li>
-<li><code>class_name</code> (str or None): CSS class name to filter by, or <code>None</code> to search by tag only</li>
-</ul>
-<p><strong>Returns:</strong></p>
-<ul>
-<li><code>str</code> or <code>None</code>: Text content if the element is found, otherwise <code>None</code></li>
-</ul>
-<p><strong>Example:</strong></p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> requests</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> bs4</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> gc_analysis.data <span class="im">import</span> extract_data</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>response <span class="op">=</span> requests.get(<span class="st">"https://example.com"</span>)</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>soup <span class="op">=</span> bs4.BeautifulSoup(response.content, <span class="st">"html.parser"</span>)</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>title <span class="op">=</span> extract_data(soup, <span class="st">'h1'</span>, <span class="va">None</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<hr>
-</section>
-<section id="clean_data" class="level3">
-<h3 class="anchored" data-anchor-id="clean_data"><code>clean_data()</code></h3>
-<p>Standardizes speaker roles across the dataset by mapping full role names to abbreviations.</p>
-<p><strong>Signature:</strong></p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>clean_data(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>df</code> (pd.DataFrame): DataFrame with a <code>role</code> column containing speaker positions</li>
-</ul>
-<p><strong>Returns:</strong></p>
-<ul>
-<li><code>pd.DataFrame</code>: DataFrame with cleaned role values</li>
-</ul>
-<p><strong>Role Mappings:</strong></p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
-<th>Full Name</th>
-<th>Abbreviation</th>
+<th>Column</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>Relief Society</td>
-<td>RS</td>
+<td><code>FIPS</code></td>
+<td>5-digit county FIPS code</td>
 </tr>
 <tr class="even">
-<td>First Presidency</td>
-<td>FP</td>
+<td><code>STATE</code></td>
+<td>2-letter state abbreviation</td>
 </tr>
 <tr class="odd">
-<td>Apostle</td>
-<td>A</td>
+<td><code>COUNTY_SERVED</code></td>
+<td>County name</td>
 </tr>
 <tr class="even">
-<td>Young Women</td>
-<td>YW</td>
+<td><code>year</code></td>
+<td>Year (2016–2024)</td>
 </tr>
 <tr class="odd">
-<td>Young Men</td>
-<td>YM</td>
+<td><code>births</code></td>
+<td>Number of births</td>
 </tr>
 <tr class="even">
-<td>Primary</td>
-<td>P</td>
+<td><code>avg_birth_weight</code></td>
+<td>Average birth weight (grams)</td>
 </tr>
 <tr class="odd">
-<td>Sunday School</td>
-<td>SS</td>
-</tr>
-<tr class="even">
-<td>Seventy</td>
-<td>70</td>
-</tr>
-<tr class="odd">
-<td>Bishop</td>
-<td>B</td>
-</tr>
-<tr class="even">
-<td>President of the Church</td>
-<td>Prophet</td>
-</tr>
-<tr class="odd">
-<td>Managing Director</td>
-<td>MD</td>
-</tr>
-<tr class="even">
-<td>Ward</td>
-<td>Member</td>
+<td><code>PFAS_county</code></td>
+<td>Population-weighted mean PFAS concentration (ng/L)</td>
 </tr>
 </tbody>
 </table>
 <p><strong>Example:</strong></p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> gc_analysis.data <span class="im">import</span> clean_data</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame({<span class="st">'role'</span>: [<span class="st">'Apostle'</span>, <span class="st">'Relief Society'</span>, <span class="st">'Young Men'</span>]})</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>df_cleaned <span class="op">=</span> clean_data(df)</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co"># df_cleaned['role'] now contains: ['A', 'RS', 'YM']</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pfas_birthweight <span class="im">import</span> build_pfas_birthweight_panel</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> build_pfas_birthweight_panel()</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(panel.head())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <hr>
 </section>
-<section id="generate_embeddings" class="level3">
-<h3 class="anchored" data-anchor-id="generate_embeddings"><code>generate_embeddings()</code></h3>
-<p>Generates vector embeddings for talk text using Ollama’s embedding model.</p>
+<section id="load_pfas" class="level3">
+<h3 class="anchored" data-anchor-id="load_pfas"><code>load_pfas()</code></h3>
+<p>Loads and cleans the raw PFAS sample data from the bundled Excel file, replacing non-detects with MRL/2.</p>
 <p><strong>Signature:</strong></p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>generate_embeddings(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>df</code> (pd.DataFrame): DataFrame with a <code>text</code> column containing talk content</li>
-</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>load_pfas()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>Returns:</strong></p>
 <ul>
-<li><code>pd.DataFrame</code>: DataFrame with a new <code>embedding</code> column containing embeddings as JSON strings</li>
-</ul>
-<p><strong>Notes:</strong></p>
-<ul>
-<li>Requires Ollama to be installed and running</li>
-<li>Uses the <code>embeddinggemma</code> model for generating embeddings</li>
-<li>Only generates embeddings for non-null text entries</li>
-<li>Embeddings are stored as JSON strings for CSV compatibility</li>
+<li><code>pd.DataFrame</code>: Cleaned sample-level PFAS data with a <code>result</code> column in ng/L</li>
 </ul>
 <hr>
 </section>
-<section id="load_embeddings_from_csv" class="level3">
-<h3 class="anchored" data-anchor-id="load_embeddings_from_csv"><code>load_embeddings_from_csv()</code></h3>
-<p>Loads a CSV file and converts JSON string embeddings back to numpy arrays.</p>
+<section id="collapse_pfas_to_pws" class="level3">
+<h3 class="anchored" data-anchor-id="collapse_pfas_to_pws"><code>collapse_pfas_to_pws()</code></h3>
+<p>Aggregates sample-level PFAS measurements to one row per public water system.</p>
 <p><strong>Signature:</strong></p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>load_embeddings_from_csv(csv_path)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>collapse_pfas_to_pws(pfas_df)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>Parameters:</strong></p>
 <ul>
-<li><code>csv_path</code> (str): Path to the CSV file containing the talk data</li>
+<li><code>pfas_df</code> (pd.DataFrame): Output of <code>load_pfas()</code></li>
 </ul>
 <p><strong>Returns:</strong></p>
 <ul>
-<li><code>pd.DataFrame</code>: DataFrame with embeddings converted to numpy arrays; rows with invalid embeddings are removed</li>
+<li><code>pd.DataFrame</code>: One row per PWS ID with mean PFAS concentration and population served</li>
+</ul>
+<hr>
+</section>
+<section id="load_geo" class="level3">
+<h3 class="anchored" data-anchor-id="load_geo"><code>load_geo()</code></h3>
+<p>Loads the EPA SDWA Geographic Areas file, keeping only county-level service area rows (<code>AREA_TYPE_CODE == "CN"</code>).</p>
+<p><strong>Signature:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>load_geo()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Returns:</strong></p>
+<ul>
+<li><code>pd.DataFrame</code>: Filtered geographic areas with <code>PWSID</code> and <code>COUNTY_SERVED</code> columns</li>
+</ul>
+<hr>
+</section>
+<section id="build_county_pfas" class="level3">
+<h3 class="anchored" data-anchor-id="build_county_pfas"><code>build_county_pfas()</code></h3>
+<p>Merges PWS-level PFAS data with the county mapping and computes population-weighted average PFAS per county.</p>
+<p><strong>Signature:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>build_county_pfas(pws_pfas, geo_df)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>pws_pfas</code> (pd.DataFrame): Output of <code>collapse_pfas_to_pws()</code></li>
+<li><code>geo_df</code> (pd.DataFrame): Output of <code>load_geo()</code></li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li><code>pd.DataFrame</code>: One row per <code>(STATE, COUNTY_SERVED)</code> with a <code>PFAS_county</code> column</li>
+</ul>
+<hr>
+</section>
+<section id="load_crosswalk" class="level3">
+<h3 class="anchored" data-anchor-id="load_crosswalk"><code>load_crosswalk()</code></h3>
+<p>Loads the Census national county FIPS crosswalk and standardizes county names by removing suffixes like “County”, “City”, and “Parish”.</p>
+<p><strong>Signature:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>load_crosswalk()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Returns:</strong></p>
+<ul>
+<li><code>pd.DataFrame</code>: Crosswalk with <code>STATE</code>, <code>FIPS</code>, <code>COUNTY_NAME</code>, and <code>COUNTY_CLEAN</code> columns</li>
+</ul>
+<hr>
+</section>
+<section id="attach_fips_to_pfas" class="level3">
+<h3 class="anchored" data-anchor-id="attach_fips_to_pfas"><code>attach_fips_to_pfas()</code></h3>
+<p>Joins 5-digit FIPS codes onto the county-level PFAS data using the Census crosswalk.</p>
+<p><strong>Signature:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>attach_fips_to_pfas(county_pfas, crosswalk)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>county_pfas</code> (pd.DataFrame): Output of <code>build_county_pfas()</code></li>
+<li><code>crosswalk</code> (pd.DataFrame): Output of <code>load_crosswalk()</code></li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li><code>pd.DataFrame</code>: <code>county_pfas</code> with a <code>FIPS</code> column attached</li>
+</ul>
+<hr>
+</section>
+<section id="load_birth_weights" class="level3">
+<h3 class="anchored" data-anchor-id="load_birth_weights"><code>load_birth_weights()</code></h3>
+<p>Loads the CDC WONDER birth weight data, dropping suppressed cells and CDC footer rows.</p>
+<p><strong>Signature:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>load_birth_weights()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Returns:</strong></p>
+<ul>
+<li><code>pd.DataFrame</code>: Panel data with columns <code>FIPS</code>, <code>year</code>, <code>births</code>, and <code>avg_birth_weight</code></li>
+</ul>
+<hr>
+</section>
+<section id="build_panel" class="level3">
+<h3 class="anchored" data-anchor-id="build_panel"><code>build_panel()</code></h3>
+<p>Merges the birth weight panel with county-level PFAS exposure data on FIPS code.</p>
+<p><strong>Signature:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>build_panel(bw_df, pfas_fips)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>bw_df</code> (pd.DataFrame): Output of <code>load_birth_weights()</code></li>
+<li><code>pfas_fips</code> (pd.DataFrame): Output of <code>attach_fips_to_pfas()</code></li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li><code>pd.DataFrame</code>: Final panel sorted by FIPS and year</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="analysis-functions" class="level2">
+<h2 class="anchored" data-anchor-id="analysis-functions">Analysis Functions</h2>
+<section id="plot_eda" class="level3">
+<h3 class="anchored" data-anchor-id="plot_eda"><code>plot_eda()</code></h3>
+<p>Produces two side-by-side exploratory plots of the panel data.</p>
+<p><strong>Signature:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>plot_eda(panel)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>panel</code> (pd.DataFrame): Output of <code>build_pfas_birthweight_panel()</code></li>
+</ul>
+<p><strong>Plots produced:</strong></p>
+<ul>
+<li>Scatter plot of PFAS concentration vs average birth weight with an OLS trend line</li>
+<li>Average birth weight over time (2016–2024) by state</li>
 </ul>
 <p><strong>Example:</strong></p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> gc_analysis.data <span class="im">import</span> load_embeddings_from_csv</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> load_embeddings_from_csv(<span class="st">"data/gc_talks.csv"</span>)</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Use embeddings for similarity analysis</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pfas_birthweight <span class="im">import</span> build_pfas_birthweight_panel, plot_eda</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> build_pfas_birthweight_panel()</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>plot_eda(panel)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="run_regression" class="level3">
+<h3 class="anchored" data-anchor-id="run_regression"><code>run_regression()</code></h3>
+<p>Runs an OLS regression of average birth weight on PFAS concentration with year fixed effects and standard errors clustered by county.</p>
+<p><strong>Signature:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>run_regression(panel)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>panel</code> (pd.DataFrame): Output of <code>build_pfas_birthweight_panel()</code></li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li><code>RegressionResultsWrapper</code>: A fitted statsmodels results object</li>
+</ul>
+<p><strong>Model:</strong></p>
+<p><span class="math display">\[\text{BirthWeight}_{ct} = \beta \cdot \text{PFAS}_{c} + \gamma_t + \varepsilon_{ct}\]</span></p>
+<p>Where <span class="math inline">\(\gamma_t\)</span> represents year fixed effects. County fixed effects are excluded by design since PFAS exposure is time-invariant and would be fully absorbed.</p>
+<p><strong>Example:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pfas_birthweight <span class="im">import</span> build_pfas_birthweight_panel, run_regression</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> build_pfas_birthweight_panel()</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> run_regression(panel)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
 
 </section>
@@ -449,13 +498,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy
