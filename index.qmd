@@ -8,6 +8,8 @@ This project investigates the relationship between PFAS (per- and polyfluoroalky
 
 Explore the data interactively with our Streamlit app [here](https://pfas-birthweight-5t5sekqrwpnvfnsnxdhsqk.streamlit.app/)!
 
+View our GitHub Repo [here](https://github.com/NathanPalmer410/PFAS-Birthweight)!
+
 ## Data Sources
 
 - **EPA UCMR PFAS Monitoring Data**: Sample-level PFAS measurements (ng/L) from public water systems across the six study states

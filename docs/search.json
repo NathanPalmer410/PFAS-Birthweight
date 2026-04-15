@@ -32,14 +32,14 @@
     "href": "index.html",
     "title": "PFAS & Birth Weight Analysis",
     "section": "",
-    "text": "This project investigates the relationship between PFAS (per- and polyfluoroalkyl substances) contamination in public drinking water systems and birth weight outcomes at the county level. Using data from the EPA, Census Bureau, and CDC, we construct a county-year panel dataset covering six states (Alabama, Arkansas, Missouri, New Jersey, Ohio, and Virginia) from 2016 to 2024.\nExplore the data interactively with our Streamlit app here!"
+    "text": "This project investigates the relationship between PFAS (per- and polyfluoroalkyl substances) contamination in public drinking water systems and birth weight outcomes at the county level. Using data from the EPA, Census Bureau, and CDC, we construct a county-year panel dataset covering six states (Alabama, Arkansas, Missouri, New Jersey, Ohio, and Virginia) from 2016 to 2024.\nExplore the data interactively with our Streamlit app here!\nView our GitHub Repo here!"
   },
   {
     "objectID": "index.html#overview",
     "href": "index.html#overview",
     "title": "PFAS & Birth Weight Analysis",
     "section": "",
-    "text": "This project investigates the relationship between PFAS (per- and polyfluoroalkyl substances) contamination in public drinking water systems and birth weight outcomes at the county level. Using data from the EPA, Census Bureau, and CDC, we construct a county-year panel dataset covering six states (Alabama, Arkansas, Missouri, New Jersey, Ohio, and Virginia) from 2016 to 2024.\nExplore the data interactively with our Streamlit app here!"
+    "text": "This project investigates the relationship between PFAS (per- and polyfluoroalkyl substances) contamination in public drinking water systems and birth weight outcomes at the county level. Using data from the EPA, Census Bureau, and CDC, we construct a county-year panel dataset covering six states (Alabama, Arkansas, Missouri, New Jersey, Ohio, and Virginia) from 2016 to 2024.\nExplore the data interactively with our Streamlit app here!\nView our GitHub Repo here!"
   },
   {
     "objectID": "index.html#data-sources",
