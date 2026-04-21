@@ -243,11 +243,10 @@ def attach_population_to_ucmr5(pws_ucmr5, pop_df):
 def load_birthweight_counts():
     df = pd.read_csv(
         _data_path("Birthweight_Counts.xls"),
-        dtype={"County of Residence Code": str},
-        sep="\t"
+        sep="\t",
+        dtype={"County of Residence Code": str}
     )
 
-    # Same footnote filter as load_birth_weights()
     df = df[df["Notes"].isna()].copy()
 
     df["Births"] = pd.to_numeric(df["Births"], errors="coerce")
@@ -259,18 +258,26 @@ def load_birthweight_counts():
         "Births": "births",
         "Infant Birth Weight 12": "birth_weight_category"
     })
+
     df["FIPS"] = df["FIPS"].str.zfill(5)
 
-    # Compute LBW rate: births under 2500g / total births per county-year
     LBW_CODES = ["500 - 999 grams", "1000 - 1499 grams",
                  "1500 - 1999 grams", "2000 - 2499 grams"]
 
-    lbw = df[
-        df["birth_weight_category"].isin(LBW_CODES)
-    ][["FIPS", "year", "births"]].rename(columns={"births": "lbw_births"})
+    # Sum all LBW categories into one row per county-year
+    lbw = (
+        df[df["birth_weight_category"].isin(LBW_CODES)]
+        .groupby(["FIPS", "year"])["births"]
+        .sum()
+        .reset_index()
+        .rename(columns={"births": "lbw_births"})
+    )
 
-    total = df.groupby(["FIPS", "year"])["births"].sum().reset_index().rename(
-        columns={"births": "total_births"}
+    total = (
+        df.groupby(["FIPS", "year"])["births"]
+        .sum()
+        .reset_index()
+        .rename(columns={"births": "total_births"})
     )
 
     result = lbw.merge(total, on=["FIPS", "year"], how="inner")
@@ -284,11 +291,10 @@ def load_birthweight_counts():
 def load_gestational_age():
     df = pd.read_csv(
         _data_path("Gestational_age.xls"),
-        dtype={"County of Residence Code": str},
-        sep="\t"
+        sep="\t",
+        dtype={"County of Residence Code": str}
     )
 
-    # Same footnote filter as load_birth_weights()
     df = df[df["Notes"].isna()].copy()
 
     df["Births"] = pd.to_numeric(df["Births"], errors="coerce")
@@ -300,25 +306,32 @@ def load_gestational_age():
         "Births": "births",
         "OE Gestational Age Recode 10": "gestational_age_category"
     })
+
     df["FIPS"] = df["FIPS"].str.zfill(5)
 
-    # Preterm = under 37 weeks (categories 1, 2, 3, 4, 5)
     PRETERM_CODES = ["Under 20 weeks", "20 - 27 weeks", "28 - 31 weeks",
                      "32 - 35 weeks", "36 weeks"]
 
-    preterm = df[
-        df["gestational_age_category"].isin(PRETERM_CODES)
-    ][["FIPS", "year", "births"]].rename(columns={"births": "preterm_births"})
+    # Sum all preterm categories into one row per county-year
+    preterm = (
+        df[df["gestational_age_category"].isin(PRETERM_CODES)]
+        .groupby(["FIPS", "year"])["births"]
+        .sum()
+        .reset_index()
+        .rename(columns={"births": "preterm_births"})
+    )
 
-    total = df.groupby(["FIPS", "year"])["births"].sum().reset_index().rename(
-        columns={"births": "total_births"}
+    total = (
+        df.groupby(["FIPS", "year"])["births"]
+        .sum()
+        .reset_index()
+        .rename(columns={"births": "total_births"})
     )
 
     result = preterm.merge(total, on=["FIPS", "year"], how="inner")
     result["preterm_rate"] = result["preterm_births"] / result["total_births"]
 
     return result[["FIPS", "year", "preterm_births", "total_births", "preterm_rate"]].copy()
-
 
 # ── NEW: Extended panel builder ───────────────────────────────────────────────
 
