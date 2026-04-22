@@ -146,7 +146,8 @@ def load_birth_weights():
         "Births": "births",
         "Average Birth Weight (grams)": "avg_birth_weight"
     })
-
+    df["FIPS"] = df["FIPS"].str.zfill(5)
+    
     return df[["FIPS", "year", "births", "avg_birth_weight"]].copy()
 
 

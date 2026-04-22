@@ -19,6 +19,7 @@ dependencies = [
     "statsmodels>=0.14.6",
     "plotly>=6.7.0",
     "streamlit>=1.50.0",
+    "kaleido>=1.2.0",
 ]
 
 [tool.setuptools.packages.find]

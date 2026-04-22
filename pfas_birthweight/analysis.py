@@ -150,76 +150,57 @@ def run_extended_regression(panel):
 
     return models
 
-def plot_compound_detection_rates(ucmr5_df):
-    # Exclude lithium - not a PFAS
+def plot_ucmr5_nondetect_table(ucmr5_df):
     pfas_df = ucmr5_df[ucmr5_df["Contaminant"] != "lithium"].copy()
 
-    # Detection = result above MRL
-    pfas_df["detected"] = pfas_df["result"] > (pfas_df["MRL"] / 2)
-
-    detection_rates = (
-        pfas_df.groupby("Contaminant")["detected"]
-        .mean()
-        .sort_values(ascending=False)
+    # Build summary table
+    summary = (
+        pfas_df.groupby("Contaminant")
+        .agg(
+            MRL_ng_L=("MRL", "median"),
+            Total_Samples=("result", "count")
+        )
         .reset_index()
+        .sort_values("MRL_ng_L")
     )
-    detection_rates["detected"] *= 100  # convert to percentage
+    summary["MRL_ug_L"] = (summary["MRL_ng_L"] / 1000).round(4)
+    summary["Detections"] = 0
+    summary["Detection Rate"] = "0.0%"
 
-    fig, ax = plt.subplots(figsize=(12, 6))
-    bars = ax.bar(detection_rates["Contaminant"], detection_rates["detected"],
-                  color="#2980B9", edgecolor="white")
-    ax.set_title("PFAS Detection Rates by Compound (UCMR5, 2023–2025)",
-                 fontsize=13, fontweight="bold")
-    ax.set_xlabel("Compound")
-    ax.set_ylabel("Detection Rate (%)")
-    ax.tick_params(axis="x", rotation=45)
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.axis("off")
 
-    # Label each bar
-    for bar, val in zip(bars, detection_rates["detected"]):
-        ax.text(bar.get_x() + bar.get_width() / 2,
-                bar.get_height() + 0.5,
-                f"{val:.1f}%", ha="center", va="bottom", fontsize=8)
+    table = ax.table(
+        cellText=summary[["Contaminant", "MRL_ug_L", "Total_Samples",
+                           "Detections", "Detection Rate"]].values,
+        colLabels=["Compound", "MRL (µg/L)", "Samples Tested",
+                   "Detections", "Detection Rate"],
+        cellLoc="center",
+        loc="center"
+    )
 
-    plt.tight_layout()
-    plt.savefig("pfas_detection_rates.png", dpi=150, bbox_inches="tight")
-    plt.show()
+    table.auto_set_font_size(False)
+    table.set_fontsize(9)
+    table.scale(1.2, 1.8)
 
+    # Header styling
+    for j in range(5):
+        table[0, j].set_facecolor("#2980B9")
+        table[0, j].set_text_props(color="white", fontweight="bold")
 
-def plot_compound_concentrations(ucmr5_df):
-    # Exclude lithium and only show detected samples
-    pfas_df = ucmr5_df[
-        (ucmr5_df["Contaminant"] != "lithium") &
-        (ucmr5_df["result"] > (ucmr5_df["MRL"] / 2))
-    ].copy()
+    # Alternating row colors
+    for i in range(1, len(summary) + 1):
+        for j in range(5):
+            table[i, j].set_facecolor("#EAF2FB" if i % 2 == 0 else "white")
 
-    order = (
-        pfas_df.groupby("Contaminant")["result"]
-        .median()
-        .sort_values(ascending=False)
-        .index.tolist()
-)
-    data = [pfas_df[pfas_df["Contaminant"] == c]["result"].values for c in order]
-
-    # Remove compounds with no data
-    order = [o for o, d in zip(order, data) if len(d) > 0]
-    data = [d for d in data if len(d) > 0]
-
-    fig, ax = plt.subplots(figsize=(12, 6))
-    bp = ax.boxplot(data, tick_labels=order, patch_artist=True, showfliers=False)
-
-    for patch in bp["boxes"]:
-        patch.set_facecolor("#2980B9")
-        patch.set_alpha(0.6)
-
-    ax.set_title("PFAS Concentration Distribution by Compound (detected samples only)",
-                 fontsize=13, fontweight="bold")
-    ax.set_xlabel("Compound")
-    ax.set_ylabel("Concentration (ng/L)")
-    ax.tick_params(axis="x", rotation=45)
+    ax.set_title("UCMR5 PFAS Monitoring Results — Study States (2023–2025)\n"
+                 "All PFAS compounds below minimum reporting levels",
+                 fontsize=12, fontweight="bold", pad=20)
 
     plt.tight_layout()
-    plt.savefig("pfas_concentrations.png", dpi=150, bbox_inches="tight")
+    plt.savefig("pfas_nondetect_table.png", dpi=150, bbox_inches="tight")
     plt.show()
+
 
 
 def plot_pfas_choropleth(panel):
@@ -254,6 +235,64 @@ def plot_pfas_choropleth(panel):
     fig.write_image("pfas_choropleth.png", scale=2)
     fig.show()
 
+def plot_regression_table(models):
+    outcomes = [
+        ("avg_birth_weight", "Avg Birth Weight (g)"),
+        ("lbw_rate",         "Low Birth Weight Rate"),
+        ("preterm_rate",     "Preterm Rate"),
+    ]
+
+    rows = []
+    for outcome, label in outcomes:
+        model = models[outcome]
+        coef = model.params["PFAS_county"]
+        se   = model.bse["PFAS_county"]
+        pval = model.pvalues["PFAS_county"]
+        ci_low, ci_high = model.conf_int().loc["PFAS_county"]
+        stars = "***" if pval < 0.01 else "**" if pval < 0.05 else "*" if pval < 0.1 else ""
+        rows.append([
+            label,
+            f"{coef:.4f}{stars}",
+            f"{se:.4f}",
+            f"[{ci_low:.4f}, {ci_high:.4f}]",
+            f"{pval:.3f}",
+            f"{model.rsquared:.4f}",
+            f"{int(model.nobs)}"
+        ])
+
+    fig, ax = plt.subplots(figsize=(13, 4))
+    ax.axis("off")
+
+    table = ax.table(
+        cellText=rows,
+        colLabels=["Outcome", "PFAS Coef", "Std Err",
+                   "95% CI", "p-value", "R²", "N"],
+        cellLoc="center",
+        loc="center"
+    )
+
+    table.auto_set_font_size(False)
+    table.set_fontsize(9)
+    table.scale(1.2, 2.0)
+
+    # Header styling
+    for j in range(7):
+        table[0, j].set_facecolor("#2980B9")
+        table[0, j].set_text_props(color="white", fontweight="bold")
+
+    # Alternating row colors
+    for i in range(1, len(rows) + 1):
+        for j in range(7):
+            table[i, j].set_facecolor("#EAF2FB" if i % 2 == 0 else "white")
+
+    ax.set_title("OLS Regression Results: PFAS ~ Birth Outcomes + Year FE\n"
+                 "Standard errors clustered by county. *** p<0.01, ** p<0.05, * p<0.1",
+                 fontsize=11, fontweight="bold", pad=20)
+
+    plt.tight_layout()
+    plt.savefig("regression_table.png", dpi=150, bbox_inches="tight")
+    plt.show()
+
 if __name__ == "__main__":
     print("Building extended panel...")
     panel = build_extended_panel()
@@ -271,8 +310,11 @@ if __name__ == "__main__":
     print("\nRunning UCMR5 compound plots...")
     from pfas_birthweight.pipeline import load_ucmr5
     ucmr5_df = load_ucmr5()
-    plot_compound_detection_rates(ucmr5_df)
-    plot_compound_concentrations(ucmr5_df)
+    plot_ucmr5_nondetect_table(ucmr5_df)
 
     print("\nGenerating choropleth...")
     plot_pfas_choropleth(panel)
+
+    print("\nRunning extended regressions...")
+    models = run_extended_regression(panel)
+    plot_regression_table(models)
