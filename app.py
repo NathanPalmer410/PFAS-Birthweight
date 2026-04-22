@@ -130,6 +130,64 @@ with tab1:
 
         st.plotly_chart(fig, use_container_width=True)
 
+        # ── CHOROPLETH MAP ──────────────────────────────────────────────────
+        st.subheader("County Map")
+
+        map_variable = st.radio(
+            "Map variable:",
+            options=["PFAS Concentration (ng/L)", selected_outcome_label],
+            horizontal=True,
+            key="map_variable_radio"
+        )
+        map_col = "PFAS_county" if map_variable == "PFAS Concentration (ng/L)" else selected_outcome
+
+        # Color scale direction: high PFAS = bad, high LBW/preterm = bad, high birth weight = good
+        if map_col == "avg_birth_weight":
+            color_scale = "RdYlGn"    # green = heavier = better
+        elif map_col in ("lbw_rate", "preterm_rate"):
+            color_scale = "RdYlGn_r"  # red = higher rate = worse
+        else:
+            color_scale = "Reds"      # red = more PFAS = worse
+
+        map_data = filtered.dropna(subset=[map_col, "FIPS"]).copy()
+        map_data["FIPS"] = map_data["FIPS"].astype(str).str.zfill(5)
+
+        if map_data.empty:
+            st.info("No map data available for this selection.")
+        else:
+            fig_map = px.choropleth(
+                map_data,
+                geojson="https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json",
+                locations="FIPS",
+                color=map_col,
+                color_continuous_scale=color_scale,
+                scope="usa",
+                hover_name="COUNTY_SERVED",
+                hover_data={
+                    "FIPS": False,
+                    "STATE": True,
+                    map_col: ":.4f",
+                },
+                labels={
+                    map_col: map_variable,
+                    "STATE": "State",
+                },
+                title=(
+                    f"{selected_state} — {map_variable} by County ({int(selected_year)})"
+                    if view_mode == "Single State"
+                    else f"All States — {map_variable} by County ({int(selected_year)})"
+                ),
+                height=550,
+            )
+            fig_map.update_layout(
+                margin={"r": 0, "t": 40, "l": 0, "b": 0},
+                coloraxis_colorbar=dict(title=map_variable),
+            )
+            if view_mode == "Single State":
+                fig_map.update_geos(fitbounds="locations", visible=True)
+
+            st.plotly_chart(fig_map, use_container_width=True)
+
         # Summary metrics
         label = selected_state if view_mode == "Single State" else "All States"
         st.subheader(f"Summary — {label} ({int(selected_year)})")
