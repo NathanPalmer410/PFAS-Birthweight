@@ -182,6 +182,141 @@ build_panel(bw_df, pfas_fips)
 
 ---
 
+### `load_birthweight_counts()`
+
+Loads CDC WONDER birth weight category counts and computes a low birth weight (LBW) rate per county-year. LBW is defined as births under 2,500 grams.
+
+**Signature:**
+```python
+load_birthweight_counts()
+```
+
+**Returns:**
+
+- `pd.DataFrame`: Panel data with columns `FIPS`, `year`, `lbw_births`, `total_births`, and `lbw_rate`
+
+---
+
+### `load_gestational_age()`
+
+Loads CDC WONDER gestational age category counts and computes a preterm birth rate per county-year. Preterm is defined as births under 37 weeks gestation.
+
+**Signature:**
+```python
+load_gestational_age()
+```
+
+**Returns:**
+
+- `pd.DataFrame`: Panel data with columns `FIPS`, `year`, `preterm_births`, `total_births`, and `preterm_rate`
+
+---
+
+### `build_extended_panel()`
+
+Extends the base panel with low birth weight rates and preterm rates by merging in outputs from `load_birthweight_counts()` and `load_gestational_age()`.
+
+**Signature:**
+```python
+build_extended_panel()
+```
+
+**Returns:**
+
+- `pd.DataFrame`: Panel DataFrame with all columns from `build_pfas_birthweight_panel()` plus `lbw_births`, `total_births`, `lbw_rate`, `preterm_births`, and `preterm_rate`
+
+**Example:**
+```python
+from pfas_birthweight import build_extended_panel
+
+panel = build_extended_panel()
+print(panel.head())
+```
+
+---
+
+### `load_ucmr5()`
+
+Loads and cleans the UCMR5 monitoring data, converting results from µg/L to ng/L and replacing non-detects with MRL/2. MRLs are joined from a separate lookup file.
+
+**Signature:**
+```python
+load_ucmr5()
+```
+
+**Returns:**
+
+- `pd.DataFrame`: Sample-level UCMR5 data with a `result` column in ng/L and a `MRL` column
+
+---
+
+### `collapse_ucmr5_to_pws()`
+
+Aggregates sample-level UCMR5 measurements to one row per public water system.
+
+**Signature:**
+```python
+collapse_ucmr5_to_pws(ucmr5_df)
+```
+
+**Parameters:**
+
+- `ucmr5_df` (pd.DataFrame): Output of `load_ucmr5()`
+
+**Returns:**
+
+- `pd.DataFrame`: One row per PWS ID with mean PFAS concentration
+
+---
+
+### `load_ucmr5_population()`
+
+Extracts population served per PWS from the existing `PFAS.xlsx` file, for use in population-weighting UCMR5 results.
+
+**Signature:**
+```python
+load_ucmr5_population()
+```
+
+**Returns:**
+
+- `pd.DataFrame`: One row per PWS ID with a `population_served` column
+
+---
+
+### `attach_population_to_ucmr5()`
+
+Joins population served onto the PWS-level UCMR5 data. Systems with no population match are assigned a weight of 1.
+
+**Signature:**
+```python
+attach_population_to_ucmr5(pws_ucmr5, pop_df)
+```
+
+**Parameters:**
+
+- `pws_ucmr5` (pd.DataFrame): Output of `collapse_ucmr5_to_pws()`
+- `pop_df` (pd.DataFrame): Output of `load_ucmr5_population()`
+
+**Returns:**
+
+- `pd.DataFrame`: `pws_ucmr5` with a `population_served` column attached
+
+---
+
+### `build_ucmr5_panel()`
+
+Builds a county-year panel using UCMR5 PFAS data instead of the primary PFAS source, filtered to 2023–2024 to match UCMR5 coverage. Includes all three birth outcomes.
+
+**Signature:**
+```python
+build_ucmr5_panel()
+```
+
+**Returns:**
+
+- `pd.DataFrame`: Panel DataFrame with the same column structure as `build_extended_panel()`, restricted to 2023–2024
+
 ## Analysis Functions
 
 ### `plot_eda()`
@@ -242,3 +377,102 @@ from pfas_birthweight import build_pfas_birthweight_panel, run_regression
 panel = build_pfas_birthweight_panel()
 model = run_regression(panel)
 ```
+---
+
+### `plot_extended_eda()`
+
+Produces a 2×3 grid of exploratory plots covering all three birth outcomes against PFAS concentration and over time.
+
+**Signature:**
+```python
+plot_extended_eda(panel)
+```
+
+**Parameters:**
+
+- `panel` (pd.DataFrame): Output of `build_extended_panel()`
+
+**Plots produced:**
+
+- Row 1: Scatter plots of PFAS concentration vs average birth weight, LBW rate, and preterm rate, each with an OLS trend line
+- Row 2: Time trends for each outcome by state (2016–2024)
+
+**Output:** Saves `eda_extended_plots.png` to the working directory
+
+---
+
+### `run_extended_regression()`
+
+Runs OLS regressions of all three birth outcomes on PFAS concentration with year fixed effects and standard errors clustered by county.
+
+**Signature:**
+```python
+run_extended_regression(panel)
+```
+
+**Parameters:**
+
+- `panel` (pd.DataFrame): Output of `build_extended_panel()`
+
+**Returns:**
+
+- `dict`: A dictionary keyed by outcome column name (`avg_birth_weight`, `lbw_rate`, `preterm_rate`), each containing a fitted statsmodels results object
+
+**Model:**
+
+$$Y_{ct} = \beta \cdot \text{PFAS}_{c} + \gamma_t + \varepsilon_{ct}$$
+
+Where $Y_{ct}$ is the birth outcome in county $c$ and year $t$, and $\gamma_t$ represents year fixed effects.
+
+---
+
+### `plot_ucmr5_nondetect_table()`
+
+Renders a formatted table summarizing UCMR5 PFAS monitoring results, showing MRLs, sample counts, and detection rates for each compound.
+
+**Signature:**
+```python
+plot_ucmr5_nondetect_table(ucmr5_df)
+```
+
+**Parameters:**
+
+- `ucmr5_df` (pd.DataFrame): Output of `load_ucmr5()`
+
+**Output:** Saves `pfas_nondetect_table.png` to the working directory
+
+---
+
+### `plot_pfas_choropleth()`
+
+Renders an interactive Plotly choropleth map of county-level PFAS concentrations for the most recent year in the panel.
+
+**Signature:**
+```python
+plot_pfas_choropleth(panel)
+```
+
+**Parameters:**
+
+- `panel` (pd.DataFrame): Output of `build_extended_panel()`
+
+**Output:** Saves `pfas_choropleth.png` to the working directory. Requires `geopandas` and `plotly` with image export support.
+
+---
+
+### `plot_regression_table()`
+
+Renders a formatted summary table of OLS regression results across all three birth outcomes.
+
+**Signature:**
+```python
+plot_regression_table(models)
+```
+
+**Parameters:**
+
+- `models` (dict): Output of `run_extended_regression()`
+
+**Table columns:** Outcome, PFAS coefficient, standard error, 95% confidence interval, p-value, R², and observation count. Significance stars follow the convention *** p<0.01, ** p<0.05, * p<0.1.
+
+**Output:** Saves `regression_table.png` to the working directory
