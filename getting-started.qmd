@@ -12,17 +12,19 @@ pip install pfas-birthweight
 
 The package requires Python 3.9+ and will automatically install the following dependencies:
 
-- `pandas` - data manipulation
-- `numpy` - numerical operations
-- `openpyxl` - Excel file reading
-- `statsmodels` - regression analysis
-- `matplotlib` - plotting
+- `pandas` — data manipulation
+- `numpy` — numerical operations
+- `openpyxl` — Excel file reading
+- `statsmodels` — regression analysis
+- `matplotlib` — plotting
 
 ## Quick Start
 
 ### 1. Build the Panel
 
-All data is bundled with the package. Simply run:
+All data is bundled with the package. Three panel builders are available depending on your analysis goals:
+
+**Original panel** (average birth weight, 2016–2024):
 
 ```python
 from pfas_birthweight import build_pfas_birthweight_panel
@@ -31,14 +33,34 @@ panel = build_pfas_birthweight_panel()
 print(panel.head())
 ```
 
-This will:
+**Extended panel** (adds low birth weight rate and preterm rate):
+
+```python
+from pfas_birthweight import build_extended_panel
+
+panel = build_extended_panel()
+print(panel.head())
+```
+
+**UCMR5 panel** (uses 2023–2025 PFAS monitoring data, filtered to 2023–2024 outcomes):
+
+```python
+from pfas_birthweight import build_ucmr5_panel
+
+panel = build_ucmr5_panel()
+print(panel.head())
+```
+
+Each builder runs through the same core steps:
 
 1. Load and clean raw PFAS sample data, replacing non-detects with MRL/2
-2. Collapse measurements to the public water system level
-3. Merge with EPA geographic areas to map systems to counties
+2. Collapse measurements to the public water system (PWS) level
+3. Merge with EPA geographic areas to map PWS IDs to counties
 4. Aggregate to population-weighted county-level PFAS estimates
 5. Attach 5-digit FIPS codes using the Census crosswalk
 6. Merge with CDC WONDER birth weight data by FIPS and year
+
+The extended and UCMR5 builders additionally compute low birth weight (LBW) rates and preterm birth rates from CDC WONDER birth count and gestational age files.
 
 ### 2. Explore the Data
 
@@ -52,7 +74,7 @@ print(f"Years:    {sorted(panel['year'].unique())}")
 print(panel[panel['STATE'] == 'OH'].head())
 ```
 
-The resulting panel has the following columns:
+The resulting panel contains the following columns:
 
 | Column | Description |
 |---|---|
@@ -62,32 +84,85 @@ The resulting panel has the following columns:
 | `year` | Year (2016–2024) |
 | `births` | Number of births |
 | `avg_birth_weight` | Average birth weight (grams) |
-| `PFAS_county` | Population-weighted mean PFAS (ng/L) |
+| `PFAS_county` | Population-weighted mean PFAS concentration (ng/L) |
+| `lbw_births` | Number of low birth weight births (extended/UCMR5 only) |
+| `total_births` | Total births from weight-category file (extended/UCMR5 only) |
+| `lbw_rate` | Share of births under 2,500 g (extended/UCMR5 only) |
+| `preterm_births` | Number of preterm births (extended/UCMR5 only) |
+| `preterm_rate` | Share of births under 37 weeks gestation (extended/UCMR5 only) |
 
 ### 3. Plot the Data
 
+**Original EDA** (PFAS vs average birth weight + time trends by state):
+
 ```python
-from pfas_birthweight import plot_eda
+from pfas_birthweight.analysis import plot_eda
 
 plot_eda(panel)
 ```
 
-This produces two side-by-side plots:
+This produces two side-by-side plots saved to `eda_plots.png`:
 
 - A scatter plot of PFAS concentration vs average birth weight with a trend line
 - Average birth weight over time (2016–2024) by state
 
-### 4. Run the Regression
+**Extended EDA** (all three outcomes):
 
 ```python
-from pfas_birthweight import run_regression
+from pfas_birthweight.analysis import plot_extended_eda
+
+plot_extended_eda(panel)
+```
+
+This produces a 2×3 grid saved to `eda_extended_plots.png`:
+
+- **Row 1**: Scatter plots of PFAS vs average birth weight, LBW rate, and preterm rate (each with trend line)
+- **Row 2**: Time trends for each outcome by state
+
+**UCMR5 non-detect table** (when all compounds fall below MRL):
+
+```python
+from pfas_birthweight.pipeline import load_ucmr5
+from pfas_birthweight.analysis import plot_ucmr5_nondetect_table
+
+ucmr5_df = load_ucmr5()
+plot_ucmr5_nondetect_table(ucmr5_df)
+```
+
+Produces a formatted table (`pfas_nondetect_table.png`) summarizing each PFAS compound, its MRL (µg/L), total samples tested, detections, and detection rate.
+
+**Choropleth map** of county-level PFAS concentrations (requires `geopandas` and `plotly`):
+
+```python
+from pfas_birthweight.analysis import plot_pfas_choropleth
+
+plot_pfas_choropleth(panel)
+```
+
+### 4. Run the Regressions
+
+**Original regression** (average birth weight only):
+
+```python
+from pfas_birthweight.analysis import run_regression
 
 model = run_regression(panel)
 ```
 
-Runs an OLS regression of average birth weight on PFAS concentration with year fixed effects and standard errors clustered by county:
+Runs OLS of average birth weight on PFAS concentration with year fixed effects and standard errors clustered by county:
 
 $$\text{BirthWeight}_{ct} = \beta \cdot \text{PFAS}_{c} + \gamma_t + \varepsilon_{ct}$$
+
+**Extended regressions** (all three outcomes):
+
+```python
+from pfas_birthweight.analysis import run_extended_regression, plot_regression_table
+
+models = run_extended_regression(panel)
+plot_regression_table(models)
+```
+
+`run_extended_regression()` fits the same OLS specification for average birth weight, LBW rate, and preterm rate, printing a summary for each. `plot_regression_table()` renders a formatted comparison table (`regression_table.png`) showing the PFAS coefficient, standard error, 95% confidence interval, p-value, R², and observation count for each outcome. Significance stars follow the convention: \*\*\* p<0.01, \*\* p<0.05, \* p<0.1.
 
 ## Saving the Panel
 
@@ -102,4 +177,30 @@ Then load it directly in subsequent scripts:
 ```python
 import pandas as pd
 panel = pd.read_csv("panel.csv", dtype={"FIPS": str})
+```
+
+## Full Example Script
+
+```python
+from pfas_birthweight import build_extended_panel
+from pfas_birthweight.analysis import (
+    plot_eda,
+    plot_extended_eda,
+    run_regression,
+    run_extended_regression,
+    plot_regression_table,
+)
+
+# Build panel
+panel = build_extended_panel()
+print(f"Panel shape: {panel.shape}")
+
+# EDA
+plot_eda(panel)
+plot_extended_eda(panel)
+
+# Regressions
+run_regression(panel)
+models = run_extended_regression(panel)
+plot_regression_table(models)
 ```

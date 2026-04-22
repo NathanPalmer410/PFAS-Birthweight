@@ -191,9 +191,10 @@ window.Quarto = {
   <li><a href="#build-the-panel" id="toc-build-the-panel" class="nav-link" data-scroll-target="#build-the-panel">1. Build the Panel</a></li>
   <li><a href="#explore-the-data" id="toc-explore-the-data" class="nav-link" data-scroll-target="#explore-the-data">2. Explore the Data</a></li>
   <li><a href="#plot-the-data" id="toc-plot-the-data" class="nav-link" data-scroll-target="#plot-the-data">3. Plot the Data</a></li>
-  <li><a href="#run-the-regression" id="toc-run-the-regression" class="nav-link" data-scroll-target="#run-the-regression">4. Run the Regression</a></li>
+  <li><a href="#run-the-regressions" id="toc-run-the-regressions" class="nav-link" data-scroll-target="#run-the-regressions">4. Run the Regressions</a></li>
   </ul></li>
   <li><a href="#saving-the-panel" id="toc-saving-the-panel" class="nav-link" data-scroll-target="#saving-the-panel">Saving the Panel</a></li>
+  <li><a href="#full-example-script" id="toc-full-example-script" class="nav-link" data-scroll-target="#full-example-script">Full Example Script</a></li>
   </ul>
 </nav>
     </div>
@@ -225,43 +226,59 @@ window.Quarto = {
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install pfas-birthweight</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The package requires Python 3.9+ and will automatically install the following dependencies:</p>
 <ul>
-<li><code>pandas</code> - data manipulation</li>
-<li><code>numpy</code> - numerical operations</li>
-<li><code>openpyxl</code> - Excel file reading</li>
-<li><code>statsmodels</code> - regression analysis</li>
-<li><code>matplotlib</code> - plotting</li>
+<li><code>pandas</code> — data manipulation</li>
+<li><code>numpy</code> — numerical operations</li>
+<li><code>openpyxl</code> — Excel file reading</li>
+<li><code>statsmodels</code> — regression analysis</li>
+<li><code>matplotlib</code> — plotting</li>
 </ul>
 </section>
 <section id="quick-start" class="level2">
 <h2 class="anchored" data-anchor-id="quick-start">Quick Start</h2>
 <section id="build-the-panel" class="level3">
 <h3 class="anchored" data-anchor-id="build-the-panel">1. Build the Panel</h3>
-<p>All data is bundled with the package. Simply run:</p>
+<p>All data is bundled with the package. Three panel builders are available depending on your analysis goals:</p>
+<p><strong>Original panel</strong> (average birth weight, 2016–2024):</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pfas_birthweight <span class="im">import</span> build_pfas_birthweight_panel</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> build_pfas_birthweight_panel()</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(panel.head())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>This will:</p>
+<p><strong>Extended panel</strong> (adds low birth weight rate and preterm rate):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pfas_birthweight <span class="im">import</span> build_extended_panel</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> build_extended_panel()</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(panel.head())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>UCMR5 panel</strong> (uses 2023–2025 PFAS monitoring data, filtered to 2023–2024 outcomes):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pfas_birthweight <span class="im">import</span> build_ucmr5_panel</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> build_ucmr5_panel()</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(panel.head())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Each builder runs through the same core steps:</p>
 <ol type="1">
 <li>Load and clean raw PFAS sample data, replacing non-detects with MRL/2</li>
-<li>Collapse measurements to the public water system level</li>
-<li>Merge with EPA geographic areas to map systems to counties</li>
+<li>Collapse measurements to the public water system (PWS) level</li>
+<li>Merge with EPA geographic areas to map PWS IDs to counties</li>
 <li>Aggregate to population-weighted county-level PFAS estimates</li>
 <li>Attach 5-digit FIPS codes using the Census crosswalk</li>
 <li>Merge with CDC WONDER birth weight data by FIPS and year</li>
 </ol>
+<p>The extended and UCMR5 builders additionally compute low birth weight (LBW) rates and preterm birth rates from CDC WONDER birth count and gestational age files.</p>
 </section>
 <section id="explore-the-data" class="level3">
 <h3 class="anchored" data-anchor-id="explore-the-data">2. Explore the Data</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check coverage</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Counties: </span><span class="sc">{</span>panel[<span class="st">'FIPS'</span>]<span class="sc">.</span>nunique()<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"States:   </span><span class="sc">{</span>panel[<span class="st">'STATE'</span>]<span class="sc">.</span>unique()<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Years:    </span><span class="sc">{</span><span class="bu">sorted</span>(panel[<span class="st">'year'</span>].unique())<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co"># View a specific state</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(panel[panel[<span class="st">'STATE'</span>] <span class="op">==</span> <span class="st">'OH'</span>].head())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The resulting panel has the following columns:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check coverage</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Counties: </span><span class="sc">{</span>panel[<span class="st">'FIPS'</span>]<span class="sc">.</span>nunique()<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"States:   </span><span class="sc">{</span>panel[<span class="st">'STATE'</span>]<span class="sc">.</span>unique()<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Years:    </span><span class="sc">{</span><span class="bu">sorted</span>(panel[<span class="st">'year'</span>].unique())<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co"># View a specific state</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(panel[panel[<span class="st">'STATE'</span>] <span class="op">==</span> <span class="st">'OH'</span>].head())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The resulting panel contains the following columns:</p>
 <table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
 <thead>
 <tr class="header">
 <th>Column</th>
@@ -295,38 +312,110 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td><code>PFAS_county</code></td>
-<td>Population-weighted mean PFAS (ng/L)</td>
+<td>Population-weighted mean PFAS concentration (ng/L)</td>
+</tr>
+<tr class="even">
+<td><code>lbw_births</code></td>
+<td>Number of low birth weight births (extended/UCMR5 only)</td>
+</tr>
+<tr class="odd">
+<td><code>total_births</code></td>
+<td>Total births from weight-category file (extended/UCMR5 only)</td>
+</tr>
+<tr class="even">
+<td><code>lbw_rate</code></td>
+<td>Share of births under 2,500 g (extended/UCMR5 only)</td>
+</tr>
+<tr class="odd">
+<td><code>preterm_births</code></td>
+<td>Number of preterm births (extended/UCMR5 only)</td>
+</tr>
+<tr class="even">
+<td><code>preterm_rate</code></td>
+<td>Share of births under 37 weeks gestation (extended/UCMR5 only)</td>
 </tr>
 </tbody>
 </table>
 </section>
 <section id="plot-the-data" class="level3">
 <h3 class="anchored" data-anchor-id="plot-the-data">3. Plot the Data</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pfas_birthweight <span class="im">import</span> plot_eda</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>plot_eda(panel)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>This produces two side-by-side plots:</p>
+<p><strong>Original EDA</strong> (PFAS vs average birth weight + time trends by state):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pfas_birthweight.analysis <span class="im">import</span> plot_eda</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>plot_eda(panel)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This produces two side-by-side plots saved to <code>eda_plots.png</code>:</p>
 <ul>
 <li>A scatter plot of PFAS concentration vs average birth weight with a trend line</li>
 <li>Average birth weight over time (2016–2024) by state</li>
 </ul>
+<p><strong>Extended EDA</strong> (all three outcomes):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pfas_birthweight.analysis <span class="im">import</span> plot_extended_eda</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>plot_extended_eda(panel)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This produces a 2×3 grid saved to <code>eda_extended_plots.png</code>:</p>
+<ul>
+<li><strong>Row 1</strong>: Scatter plots of PFAS vs average birth weight, LBW rate, and preterm rate (each with trend line)</li>
+<li><strong>Row 2</strong>: Time trends for each outcome by state</li>
+</ul>
+<p><strong>UCMR5 non-detect table</strong> (when all compounds fall below MRL):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pfas_birthweight.pipeline <span class="im">import</span> load_ucmr5</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pfas_birthweight.analysis <span class="im">import</span> plot_ucmr5_nondetect_table</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>ucmr5_df <span class="op">=</span> load_ucmr5()</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>plot_ucmr5_nondetect_table(ucmr5_df)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Produces a formatted table (<code>pfas_nondetect_table.png</code>) summarizing each PFAS compound, its MRL (µg/L), total samples tested, detections, and detection rate.</p>
+<p><strong>Choropleth map</strong> of county-level PFAS concentrations (requires <code>geopandas</code> and <code>plotly</code>):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pfas_birthweight.analysis <span class="im">import</span> plot_pfas_choropleth</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>plot_pfas_choropleth(panel)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="run-the-regression" class="level3">
-<h3 class="anchored" data-anchor-id="run-the-regression">4. Run the Regression</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pfas_birthweight <span class="im">import</span> run_regression</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> run_regression(panel)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Runs an OLS regression of average birth weight on PFAS concentration with year fixed effects and standard errors clustered by county:</p>
+<section id="run-the-regressions" class="level3">
+<h3 class="anchored" data-anchor-id="run-the-regressions">4. Run the Regressions</h3>
+<p><strong>Original regression</strong> (average birth weight only):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pfas_birthweight.analysis <span class="im">import</span> run_regression</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> run_regression(panel)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Runs OLS of average birth weight on PFAS concentration with year fixed effects and standard errors clustered by county:</p>
 <p><span class="math display">\[\text{BirthWeight}_{ct} = \beta \cdot \text{PFAS}_{c} + \gamma_t + \varepsilon_{ct}\]</span></p>
+<p><strong>Extended regressions</strong> (all three outcomes):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pfas_birthweight.analysis <span class="im">import</span> run_extended_regression, plot_regression_table</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>models <span class="op">=</span> run_extended_regression(panel)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>plot_regression_table(models)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>run_extended_regression()</code> fits the same OLS specification for average birth weight, LBW rate, and preterm rate, printing a summary for each. <code>plot_regression_table()</code> renders a formatted comparison table (<code>regression_table.png</code>) showing the PFAS coefficient, standard error, 95% confidence interval, p-value, R², and observation count for each outcome. Significance stars follow the convention: *** p&lt;0.01, ** p&lt;0.05, * p&lt;0.1.</p>
 </section>
 </section>
 <section id="saving-the-panel" class="level2">
 <h2 class="anchored" data-anchor-id="saving-the-panel">Saving the Panel</h2>
 <p>If you plan to run analysis scripts repeatedly, save the panel to CSV to avoid rebuilding the pipeline each time:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>panel.to_csv(<span class="st">"panel.csv"</span>, index<span class="op">=</span><span class="va">False</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>panel.to_csv(<span class="st">"panel.csv"</span>, index<span class="op">=</span><span class="va">False</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Then load it directly in subsequent scripts:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> pd.read_csv(<span class="st">"panel.csv"</span>, dtype<span class="op">=</span>{<span class="st">"FIPS"</span>: <span class="bu">str</span>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> pd.read_csv(<span class="st">"panel.csv"</span>, dtype<span class="op">=</span>{<span class="st">"FIPS"</span>: <span class="bu">str</span>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="full-example-script" class="level2">
+<h2 class="anchored" data-anchor-id="full-example-script">Full Example Script</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pfas_birthweight <span class="im">import</span> build_extended_panel</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pfas_birthweight.analysis <span class="im">import</span> (</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    plot_eda,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    plot_extended_eda,</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    run_regression,</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    run_extended_regression,</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    plot_regression_table,</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Build panel</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> build_extended_panel()</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Panel shape: </span><span class="sc">{</span>panel<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="co"># EDA</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>plot_eda(panel)</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>plot_extended_eda(panel)</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Regressions</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>run_regression(panel)</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>models <span class="op">=</span> run_extended_regression(panel)</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>plot_regression_table(models)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
 
 </section>

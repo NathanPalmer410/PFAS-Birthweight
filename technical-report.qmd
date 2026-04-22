@@ -110,7 +110,7 @@ and each birth outcome across the 404 counties in the sample. The scatter plots
 below show cross-sectional associations for the most recent year, while the time
 trend charts track state-level averages from 2016–2024.
 
-![PFAS & Birth Outcomes — Extended Exploratory Analysis](pfas_birthweight\eda_extended_plots.png)
+![PFAS & Birth Outcomes — Extended Exploratory Analysis](pfas_birthweight/eda_extended_plots.png)
 
 The scatter plots suggest a modest negative association between PFAS concentration
 and average birth weight, consistent with prior literature. The relationship with
@@ -135,7 +135,7 @@ is -0.0016 (p=0.427), both negligible in magnitude. R² values across all three
 models are below 0.04, indicating that PFAS concentration and year fixed effects
 together explain very little of the variation in birth outcomes in this sample.
 
-![OLS Regression Results](pfas_birthweight\regression_table.png)
+![OLS Regression Results](pfas_birthweight/regression_table.png)
 
 These null results should be interpreted carefully rather than taken as evidence
 that PFAS exposure has no effect on birth outcomes. Several features of the data

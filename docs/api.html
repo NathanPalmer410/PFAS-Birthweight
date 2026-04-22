@@ -197,11 +197,24 @@ window.Quarto = {
   <li><a href="#attach_fips_to_pfas" id="toc-attach_fips_to_pfas" class="nav-link" data-scroll-target="#attach_fips_to_pfas"><code>attach_fips_to_pfas()</code></a></li>
   <li><a href="#load_birth_weights" id="toc-load_birth_weights" class="nav-link" data-scroll-target="#load_birth_weights"><code>load_birth_weights()</code></a></li>
   <li><a href="#build_panel" id="toc-build_panel" class="nav-link" data-scroll-target="#build_panel"><code>build_panel()</code></a></li>
+  <li><a href="#load_birthweight_counts" id="toc-load_birthweight_counts" class="nav-link" data-scroll-target="#load_birthweight_counts"><code>load_birthweight_counts()</code></a></li>
+  <li><a href="#load_gestational_age" id="toc-load_gestational_age" class="nav-link" data-scroll-target="#load_gestational_age"><code>load_gestational_age()</code></a></li>
+  <li><a href="#build_extended_panel" id="toc-build_extended_panel" class="nav-link" data-scroll-target="#build_extended_panel"><code>build_extended_panel()</code></a></li>
+  <li><a href="#load_ucmr5" id="toc-load_ucmr5" class="nav-link" data-scroll-target="#load_ucmr5"><code>load_ucmr5()</code></a></li>
+  <li><a href="#collapse_ucmr5_to_pws" id="toc-collapse_ucmr5_to_pws" class="nav-link" data-scroll-target="#collapse_ucmr5_to_pws"><code>collapse_ucmr5_to_pws()</code></a></li>
+  <li><a href="#load_ucmr5_population" id="toc-load_ucmr5_population" class="nav-link" data-scroll-target="#load_ucmr5_population"><code>load_ucmr5_population()</code></a></li>
+  <li><a href="#attach_population_to_ucmr5" id="toc-attach_population_to_ucmr5" class="nav-link" data-scroll-target="#attach_population_to_ucmr5"><code>attach_population_to_ucmr5()</code></a></li>
+  <li><a href="#build_ucmr5_panel" id="toc-build_ucmr5_panel" class="nav-link" data-scroll-target="#build_ucmr5_panel"><code>build_ucmr5_panel()</code></a></li>
   </ul></li>
   <li><a href="#analysis-functions" id="toc-analysis-functions" class="nav-link" data-scroll-target="#analysis-functions">Analysis Functions</a>
   <ul class="collapse">
   <li><a href="#plot_eda" id="toc-plot_eda" class="nav-link" data-scroll-target="#plot_eda"><code>plot_eda()</code></a></li>
   <li><a href="#run_regression" id="toc-run_regression" class="nav-link" data-scroll-target="#run_regression"><code>run_regression()</code></a></li>
+  <li><a href="#plot_extended_eda" id="toc-plot_extended_eda" class="nav-link" data-scroll-target="#plot_extended_eda"><code>plot_extended_eda()</code></a></li>
+  <li><a href="#run_extended_regression" id="toc-run_extended_regression" class="nav-link" data-scroll-target="#run_extended_regression"><code>run_extended_regression()</code></a></li>
+  <li><a href="#plot_ucmr5_nondetect_table" id="toc-plot_ucmr5_nondetect_table" class="nav-link" data-scroll-target="#plot_ucmr5_nondetect_table"><code>plot_ucmr5_nondetect_table()</code></a></li>
+  <li><a href="#plot_pfas_choropleth" id="toc-plot_pfas_choropleth" class="nav-link" data-scroll-target="#plot_pfas_choropleth"><code>plot_pfas_choropleth()</code></a></li>
+  <li><a href="#plot_regression_table" id="toc-plot_regression_table" class="nav-link" data-scroll-target="#plot_regression_table"><code>plot_regression_table()</code></a></li>
   </ul></li>
   </ul>
 </nav>
@@ -396,6 +409,107 @@ window.Quarto = {
 </ul>
 <hr>
 </section>
+<section id="load_birthweight_counts" class="level3">
+<h3 class="anchored" data-anchor-id="load_birthweight_counts"><code>load_birthweight_counts()</code></h3>
+<p>Loads CDC WONDER birth weight category counts and computes a low birth weight (LBW) rate per county-year. LBW is defined as births under 2,500 grams.</p>
+<p><strong>Signature:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>load_birthweight_counts()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Returns:</strong></p>
+<ul>
+<li><code>pd.DataFrame</code>: Panel data with columns <code>FIPS</code>, <code>year</code>, <code>lbw_births</code>, <code>total_births</code>, and <code>lbw_rate</code></li>
+</ul>
+<hr>
+</section>
+<section id="load_gestational_age" class="level3">
+<h3 class="anchored" data-anchor-id="load_gestational_age"><code>load_gestational_age()</code></h3>
+<p>Loads CDC WONDER gestational age category counts and computes a preterm birth rate per county-year. Preterm is defined as births under 37 weeks gestation.</p>
+<p><strong>Signature:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>load_gestational_age()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Returns:</strong></p>
+<ul>
+<li><code>pd.DataFrame</code>: Panel data with columns <code>FIPS</code>, <code>year</code>, <code>preterm_births</code>, <code>total_births</code>, and <code>preterm_rate</code></li>
+</ul>
+<hr>
+</section>
+<section id="build_extended_panel" class="level3">
+<h3 class="anchored" data-anchor-id="build_extended_panel"><code>build_extended_panel()</code></h3>
+<p>Extends the base panel with low birth weight rates and preterm rates by merging in outputs from <code>load_birthweight_counts()</code> and <code>load_gestational_age()</code>.</p>
+<p><strong>Signature:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>build_extended_panel()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Returns:</strong></p>
+<ul>
+<li><code>pd.DataFrame</code>: Panel DataFrame with all columns from <code>build_pfas_birthweight_panel()</code> plus <code>lbw_births</code>, <code>total_births</code>, <code>lbw_rate</code>, <code>preterm_births</code>, and <code>preterm_rate</code></li>
+</ul>
+<p><strong>Example:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pfas_birthweight <span class="im">import</span> build_extended_panel</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> build_extended_panel()</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(panel.head())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="load_ucmr5" class="level3">
+<h3 class="anchored" data-anchor-id="load_ucmr5"><code>load_ucmr5()</code></h3>
+<p>Loads and cleans the UCMR5 monitoring data, converting results from µg/L to ng/L and replacing non-detects with MRL/2. MRLs are joined from a separate lookup file.</p>
+<p><strong>Signature:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>load_ucmr5()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Returns:</strong></p>
+<ul>
+<li><code>pd.DataFrame</code>: Sample-level UCMR5 data with a <code>result</code> column in ng/L and a <code>MRL</code> column</li>
+</ul>
+<hr>
+</section>
+<section id="collapse_ucmr5_to_pws" class="level3">
+<h3 class="anchored" data-anchor-id="collapse_ucmr5_to_pws"><code>collapse_ucmr5_to_pws()</code></h3>
+<p>Aggregates sample-level UCMR5 measurements to one row per public water system.</p>
+<p><strong>Signature:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>collapse_ucmr5_to_pws(ucmr5_df)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>ucmr5_df</code> (pd.DataFrame): Output of <code>load_ucmr5()</code></li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li><code>pd.DataFrame</code>: One row per PWS ID with mean PFAS concentration</li>
+</ul>
+<hr>
+</section>
+<section id="load_ucmr5_population" class="level3">
+<h3 class="anchored" data-anchor-id="load_ucmr5_population"><code>load_ucmr5_population()</code></h3>
+<p>Extracts population served per PWS from the existing <code>PFAS.xlsx</code> file, for use in population-weighting UCMR5 results.</p>
+<p><strong>Signature:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>load_ucmr5_population()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Returns:</strong></p>
+<ul>
+<li><code>pd.DataFrame</code>: One row per PWS ID with a <code>population_served</code> column</li>
+</ul>
+<hr>
+</section>
+<section id="attach_population_to_ucmr5" class="level3">
+<h3 class="anchored" data-anchor-id="attach_population_to_ucmr5"><code>attach_population_to_ucmr5()</code></h3>
+<p>Joins population served onto the PWS-level UCMR5 data. Systems with no population match are assigned a weight of 1.</p>
+<p><strong>Signature:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>attach_population_to_ucmr5(pws_ucmr5, pop_df)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>pws_ucmr5</code> (pd.DataFrame): Output of <code>collapse_ucmr5_to_pws()</code></li>
+<li><code>pop_df</code> (pd.DataFrame): Output of <code>load_ucmr5_population()</code></li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li><code>pd.DataFrame</code>: <code>pws_ucmr5</code> with a <code>population_served</code> column attached</li>
+</ul>
+<hr>
+</section>
+<section id="build_ucmr5_panel" class="level3">
+<h3 class="anchored" data-anchor-id="build_ucmr5_panel"><code>build_ucmr5_panel()</code></h3>
+<p>Builds a county-year panel using UCMR5 PFAS data instead of the primary PFAS source, filtered to 2023–2024 to match UCMR5 coverage. Includes all three birth outcomes.</p>
+<p><strong>Signature:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>build_ucmr5_panel()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Returns:</strong></p>
+<ul>
+<li><code>pd.DataFrame</code>: Panel DataFrame with the same column structure as <code>build_extended_panel()</code>, restricted to 2023–2024</li>
+</ul>
+</section>
 </section>
 <section id="analysis-functions" class="level2">
 <h2 class="anchored" data-anchor-id="analysis-functions">Analysis Functions</h2>
@@ -403,7 +517,7 @@ window.Quarto = {
 <h3 class="anchored" data-anchor-id="plot_eda"><code>plot_eda()</code></h3>
 <p>Produces two side-by-side exploratory plots of the panel data.</p>
 <p><strong>Signature:</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>plot_eda(panel)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>plot_eda(panel)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>Parameters:</strong></p>
 <ul>
 <li><code>panel</code> (pd.DataFrame): Output of <code>build_pfas_birthweight_panel()</code></li>
@@ -414,17 +528,17 @@ window.Quarto = {
 <li>Average birth weight over time (2016–2024) by state</li>
 </ul>
 <p><strong>Example:</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pfas_birthweight <span class="im">import</span> build_pfas_birthweight_panel, plot_eda</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> build_pfas_birthweight_panel()</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>plot_eda(panel)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pfas_birthweight <span class="im">import</span> build_pfas_birthweight_panel, plot_eda</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> build_pfas_birthweight_panel()</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>plot_eda(panel)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <hr>
 </section>
 <section id="run_regression" class="level3">
 <h3 class="anchored" data-anchor-id="run_regression"><code>run_regression()</code></h3>
 <p>Runs an OLS regression of average birth weight on PFAS concentration with year fixed effects and standard errors clustered by county.</p>
 <p><strong>Signature:</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>run_regression(panel)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>run_regression(panel)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>Parameters:</strong></p>
 <ul>
 <li><code>panel</code> (pd.DataFrame): Output of <code>build_pfas_birthweight_panel()</code></li>
@@ -437,10 +551,82 @@ window.Quarto = {
 <p><span class="math display">\[\text{BirthWeight}_{ct} = \beta \cdot \text{PFAS}_{c} + \gamma_t + \varepsilon_{ct}\]</span></p>
 <p>Where <span class="math inline">\(\gamma_t\)</span> represents year fixed effects. County fixed effects are excluded by design since PFAS exposure is time-invariant and would be fully absorbed.</p>
 <p><strong>Example:</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pfas_birthweight <span class="im">import</span> build_pfas_birthweight_panel, run_regression</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> build_pfas_birthweight_panel()</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> run_regression(panel)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pfas_birthweight <span class="im">import</span> build_pfas_birthweight_panel, run_regression</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> build_pfas_birthweight_panel()</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> run_regression(panel)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<hr>
+</section>
+<section id="plot_extended_eda" class="level3">
+<h3 class="anchored" data-anchor-id="plot_extended_eda"><code>plot_extended_eda()</code></h3>
+<p>Produces a 2×3 grid of exploratory plots covering all three birth outcomes against PFAS concentration and over time.</p>
+<p><strong>Signature:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>plot_extended_eda(panel)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>panel</code> (pd.DataFrame): Output of <code>build_extended_panel()</code></li>
+</ul>
+<p><strong>Plots produced:</strong></p>
+<ul>
+<li>Row 1: Scatter plots of PFAS concentration vs average birth weight, LBW rate, and preterm rate, each with an OLS trend line</li>
+<li>Row 2: Time trends for each outcome by state (2016–2024)</li>
+</ul>
+<p><strong>Output:</strong> Saves <code>eda_extended_plots.png</code> to the working directory</p>
+<hr>
+</section>
+<section id="run_extended_regression" class="level3">
+<h3 class="anchored" data-anchor-id="run_extended_regression"><code>run_extended_regression()</code></h3>
+<p>Runs OLS regressions of all three birth outcomes on PFAS concentration with year fixed effects and standard errors clustered by county.</p>
+<p><strong>Signature:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>run_extended_regression(panel)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>panel</code> (pd.DataFrame): Output of <code>build_extended_panel()</code></li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li><code>dict</code>: A dictionary keyed by outcome column name (<code>avg_birth_weight</code>, <code>lbw_rate</code>, <code>preterm_rate</code>), each containing a fitted statsmodels results object</li>
+</ul>
+<p><strong>Model:</strong></p>
+<p><span class="math display">\[Y_{ct} = \beta \cdot \text{PFAS}_{c} + \gamma_t + \varepsilon_{ct}\]</span></p>
+<p>Where <span class="math inline">\(Y_{ct}\)</span> is the birth outcome in county <span class="math inline">\(c\)</span> and year <span class="math inline">\(t\)</span>, and <span class="math inline">\(\gamma_t\)</span> represents year fixed effects.</p>
+<hr>
+</section>
+<section id="plot_ucmr5_nondetect_table" class="level3">
+<h3 class="anchored" data-anchor-id="plot_ucmr5_nondetect_table"><code>plot_ucmr5_nondetect_table()</code></h3>
+<p>Renders a formatted table summarizing UCMR5 PFAS monitoring results, showing MRLs, sample counts, and detection rates for each compound.</p>
+<p><strong>Signature:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>plot_ucmr5_nondetect_table(ucmr5_df)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>ucmr5_df</code> (pd.DataFrame): Output of <code>load_ucmr5()</code></li>
+</ul>
+<p><strong>Output:</strong> Saves <code>pfas_nondetect_table.png</code> to the working directory</p>
+<hr>
+</section>
+<section id="plot_pfas_choropleth" class="level3">
+<h3 class="anchored" data-anchor-id="plot_pfas_choropleth"><code>plot_pfas_choropleth()</code></h3>
+<p>Renders an interactive Plotly choropleth map of county-level PFAS concentrations for the most recent year in the panel.</p>
+<p><strong>Signature:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>plot_pfas_choropleth(panel)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>panel</code> (pd.DataFrame): Output of <code>build_extended_panel()</code></li>
+</ul>
+<p><strong>Output:</strong> Saves <code>pfas_choropleth.png</code> to the working directory. Requires <code>geopandas</code> and <code>plotly</code> with image export support.</p>
+<hr>
+</section>
+<section id="plot_regression_table" class="level3">
+<h3 class="anchored" data-anchor-id="plot_regression_table"><code>plot_regression_table()</code></h3>
+<p>Renders a formatted summary table of OLS regression results across all three birth outcomes.</p>
+<p><strong>Signature:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>plot_regression_table(models)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>models</code> (dict): Output of <code>run_extended_regression()</code></li>
+</ul>
+<p><strong>Table columns:</strong> Outcome, PFAS coefficient, standard error, 95% confidence interval, p-value, R², and observation count. Significance stars follow the convention *** p&lt;0.01, ** p&lt;0.05, * p&lt;0.1.</p>
+<p><strong>Output:</strong> Saves <code>regression_table.png</code> to the working directory</p>
 
 
 </section>

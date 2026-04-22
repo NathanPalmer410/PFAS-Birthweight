@@ -4,7 +4,7 @@ title: "PFAS & Birth Weight Analysis"
 
 ## Overview
 
-This project investigates the relationship between PFAS (per- and polyfluoroalkyl substances) contamination in public drinking water systems and birth weight outcomes at the county level. Using data from the EPA, Census Bureau, and CDC, we construct a county-year panel dataset covering six states (Alabama, Arkansas, Missouri, New Jersey, Ohio, and Virginia) from 2016 to 2024.
+This project investigates the relationship between PFAS (per- and polyfluoroalkyl substances) contamination in public drinking water systems and birth outcomes at the county level. Using data from the EPA, Census Bureau, and CDC, we construct a county-year panel dataset covering six states (Alabama, Arkansas, Missouri, New Jersey, Ohio, and Virginia) from 2016 to 2024.
 
 Explore the data interactively with our Streamlit app [here](https://pfas-birthweight-5t5sekqrwpnvfnsnxdhsqk.streamlit.app/)!
 
@@ -12,10 +12,13 @@ View our GitHub Repo [here](https://github.com/NathanPalmer410/PFAS-Birthweight)
 
 ## Data Sources
 
-- **EPA UCMR PFAS Monitoring Data**: Sample-level PFAS measurements (ng/L) from public water systems across the six study states
-- **EPA SDWA Geographic Areas**: Maps public water system IDs to the counties they serve
-- **Census National County FIPS Crosswalk**: Links county names to standardized 5-digit FIPS codes
-- **CDC WONDER Birth Weight Data**: County-level average birth weight and total births by year (2016–2024)
+- **EPA UCMR PFAS Monitoring Data** (`PFAS.xlsx`): Sample-level PFAS measurements (ng/L) from public water systems across the six study states
+- **EPA UCMR5 Data** (`UCMR5.xlsx`): A second round of PFAS monitoring data (2023–2025) converted from µg/L to ng/L to match the original pipeline; contaminant-level minimum reporting levels (MRLs) are joined from a companion lookup file (`UCMR_min_reporting_level.xlsx`)
+- **EPA SDWA Geographic Areas** (`SDWA_GEOGRAPHIC_AREAS.csv`): Maps public water system IDs to the counties they serve
+- **Census National County FIPS Crosswalk** (`national_county.txt`): Links county names to standardized 5-digit FIPS codes
+- **CDC WONDER Birth Weight Data** (`birth_weights.csv`): County-level average birth weight and total births by year (2016–2024)
+- **CDC WONDER Birth Weight Counts** (`Birthweight_Counts.xls`): County-year birth counts broken out by birth weight category, used to compute low birth weight (LBW) rates
+- **CDC WONDER Gestational Age Data** (`Gestational_age.xls`): County-year birth counts broken out by gestational age category, used to compute preterm birth rates
 
 ## Pipeline
 
@@ -23,24 +26,42 @@ The pipeline is packaged as `pfas-birthweight`, available on [PyPI](https://pypi
 
 ```python
 pip install pfas-birthweight
-
-from pfas_birthweight import build_pfas_birthweight_panel
-panel = build_pfas_birthweight_panel()
 ```
 
-The pipeline runs through the following steps:
+The package exposes three panel-building entry points:
 
-1. **Load and clean PFAS data**: Raw sample-level measurements are loaded and non-detects are replaced with half the minimum reporting level (MRL/2), a standard method in environmental health literature
-2. **Collapse to PWS level**: Samples are averaged to the public water system level, retaining population served
-3. **Merge with EPA geographic areas**: PWS IDs are matched to counties using the EPA SDWA geographic areas dataset, filtering for county-level service area codes
-4. **Aggregate to county level**: PFAS concentrations are aggregated to the county level using population-weighted averages, grouping by state and county to avoid collapsing same-named counties across states
-5. **Attach FIPS codes**: County names are standardized and matched to 5-digit FIPS codes using the Census crosswalk
-6. **Merge with birth weight data**: The county-level PFAS estimates are merged onto the CDC WONDER panel using FIPS codes, producing a county-year dataset ready for analysis
+| Function | Description |
+|---|---|
+| `build_pfas_birthweight_panel()` | Original panel: average birth weight + PFAS (UCMR 3/4), 2016–2024 |
+| `build_extended_panel()` | Adds LBW rate and preterm rate outcomes to the original panel |
+| `build_ucmr5_panel()` | UCMR5-based PFAS estimates merged with 2023–2024 outcomes (avg birth weight, LBW rate, preterm rate) |
+
+### Pipeline Steps (shared across all three builders)
+
+1. **Load and clean PFAS data**: Raw sample-level measurements are loaded and non-detects are replaced with half the minimum reporting level (MRL/2), a standard method in environmental health literature. For UCMR5 data, measurements are converted from µg/L to ng/L and MRLs are joined from a separate lookup table.
+2. **Collapse to PWS level**: Samples are averaged to the public water system (PWS) level. Population served is retained from `PFAS.xlsx` for both the original and UCMR5 paths.
+3. **Merge with EPA geographic areas**: PWS IDs are matched to counties using the EPA SDWA geographic areas dataset, filtering for county-level service area codes (`AREA_TYPE_CODE == "CN"`).
+4. **Aggregate to county level**: PFAS concentrations are aggregated to the county level using population-weighted averages, grouped by state and county to avoid collapsing same-named counties across states.
+5. **Attach FIPS codes**: County names are standardized (stripping "County", "City", "Parish" suffixes) and matched to 5-digit FIPS codes using the Census crosswalk.
+6. **Merge with birth weight data**: The county-level PFAS estimates are merged onto the CDC WONDER panel using FIPS codes, producing a county-year dataset ready for analysis.
+7. **Attach LBW and preterm rates** *(extended and UCMR5 panels only)*: Low birth weight births (< 2,500 g, using four weight categories) and preterm births (< 37 weeks, using five gestational age categories) are summed per county-year and divided by total births to produce rate variables.
 
 ## Analysis
 
-The final dataset contains 404 unique counties across 6 states with 747 county-year observations. Analysis is performed using OLS regression with year fixed effects and standard errors clustered by county:
+Three outcomes are analyzed:
 
-$$\text{BirthWeight}_{ct} = \beta \cdot \text{PFAS}_{c} + \gamma_t + \varepsilon_{ct}$$
+- **Average birth weight** (grams) — the primary outcome
+- **Low birth weight (LBW) rate** — share of births under 2,500 g
+- **Preterm rate** — share of births under 37 weeks gestation
 
-Where $\gamma_t$ represents year fixed effects controlling for national trends in birth weight over time. Because PFAS exposure is measured as a single cross-sectional value per county, county fixed effects are excluded by design as they would absorb the exposure variable entirely.
+All three are regressed on county-level PFAS concentration using OLS with year fixed effects and standard errors clustered by county:
+
+$$\text{Outcome}_{ct} = \beta \cdot \text{PFAS}_{c} + \gamma_t + \varepsilon_{ct}$$
+
+Where $\gamma_t$ represents year fixed effects controlling for national trends over time. Because PFAS exposure is measured as a single cross-sectional value per county, county fixed effects are excluded by design — they would absorb the exposure variable entirely.
+
+Regression results across all three outcomes are summarized in a formatted table via `plot_regression_table()`.
+
+### UCMR5 Supplement
+
+A separate analysis uses UCMR5 monitoring data (2023–2025) merged with 2023–2024 birth outcome data. Because all UCMR5 PFAS compounds in the study states fell below their minimum reporting levels, a non-detect summary table is produced via `plot_ucmr5_nondetect_table()` in place of regression results.
