@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pfas-birthweight"
-version = "0.1.3"
+version = "0.1.5"
 description = "Build a county-year panel dataset linking PFAS drinking water contamination to birth weight outcomes."
 readme = "README.md"
 requires-python = ">=3.9"
