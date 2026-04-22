@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
-from pfas_birthweight import build_pfas_birthweight_panel, build_extended_panel
+from pfas_birthweight import build_pfas_birthweight_panel, build_extended_panel, data
 
 def plot_eda(panel):
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
@@ -155,7 +155,7 @@ def plot_compound_detection_rates(ucmr5_df):
     pfas_df = ucmr5_df[ucmr5_df["Contaminant"] != "lithium"].copy()
 
     # Detection = result above MRL
-    pfas_df["detected"] = pfas_df["result"] > pfas_df["MRL"]
+    pfas_df["detected"] = pfas_df["result"] > (pfas_df["MRL"] / 2)
 
     detection_rates = (
         pfas_df.groupby("Contaminant")["detected"]
@@ -189,20 +189,23 @@ def plot_compound_concentrations(ucmr5_df):
     # Exclude lithium and only show detected samples
     pfas_df = ucmr5_df[
         (ucmr5_df["Contaminant"] != "lithium") &
-        (ucmr5_df["result"] > ucmr5_df["MRL"])
+        (ucmr5_df["result"] > (ucmr5_df["MRL"] / 2))
     ].copy()
 
-    # Order compounds by median concentration
     order = (
         pfas_df.groupby("Contaminant")["result"]
         .median()
         .sort_values(ascending=False)
         .index.tolist()
-    )
+)
+    data = [pfas_df[pfas_df["Contaminant"] == c]["result"].values for c in order]
+
+    # Remove compounds with no data
+    order = [o for o, d in zip(order, data) if len(d) > 0]
+    data = [d for d in data if len(d) > 0]
 
     fig, ax = plt.subplots(figsize=(12, 6))
-    data = [pfas_df[pfas_df["Contaminant"] == c]["result"].values for c in order]
-    bp = ax.boxplot(data, labels=order, patch_artist=True, showfliers=False)
+    bp = ax.boxplot(data, tick_labels=order, patch_artist=True, showfliers=False)
 
     for patch in bp["boxes"]:
         patch.set_facecolor("#2980B9")
