@@ -3,7 +3,7 @@ project:
   output-dir: docs
 
 website:
-  title: "General Conference Analysis"
+  title: "PFAS & Birth Weight Analysis"
   navbar:
     left:
       - href: index.qmd
